@@ -425,8 +425,8 @@
             state.recruitedUsers.forEach(user => {
                 const card = document.createElement('div');
                 card.className = 'user-card bg-white p-4 rounded-lg border border-gray-200 flex items-center space-x-4';
-                // [新增] 动态生成头像
-                const avatarUrl = `https://api.multiavatar.com/${encodeURIComponent(user.name)}.svg`;
+                // [FIX] Switched to a China-friendly avatar service
+                const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random&color=fff&font-size=0.5`;
                 card.innerHTML = `
                     <img src="${avatarUrl}" alt="用户头像" class="w-16 h-16 rounded-full bg-gray-200 border-2 border-white shadow">
                     <div>
