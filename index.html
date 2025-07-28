@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>蒋昌盛 | 市场研究与用户洞察专家</title>
+    <title>蒋昌盛 | AI数据科学家 & 用户洞察专家</title>
     
     <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -25,12 +25,55 @@
             overflow-x: hidden; /* Prevent horizontal scroll */
         }
         
-        /* --- Static Hero Background --- */
+        /* --- Hero Background --- */
         .hero-bg {
-            background-color: #ffffff; /* White hero background */
-            background-image: radial-gradient(circle at 1px 1px, rgba(0,0,0,0.05) 1px, transparent 0);
-            background-size: 2rem 2rem;
+            background-color: #ffffff;
+            position: relative; /* Needed for the aurora effect */
+            overflow: hidden; /* Hide overflowing parts of the aurora */
         }
+
+        /* --- Aurora Background Effect --- */
+        .aurora-bg {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 0; /* Place it behind the content */
+        }
+        .aurora-bg::before,
+        .aurora-bg::after {
+            content: '';
+            position: absolute;
+            width: 800px;
+            height: 800px;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.15;
+            will-change: transform;
+        }
+        .aurora-bg::before {
+            background-image: radial-gradient(circle, #4f46e5, transparent 60%);
+            top: -300px;
+            left: -300px;
+            animation: move-aurora-1 25s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
+        }
+        .aurora-bg::after {
+            background-image: radial-gradient(circle, #c026d3, transparent 60%);
+            bottom: -300px;
+            right: -300px;
+            animation: move-aurora-2 30s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
+        }
+        @keyframes move-aurora-1 {
+            from { transform: translateX(0) translateY(0) rotate(0deg) scale(1); }
+            to { transform: translateX(100px) translateY(50px) rotate(180deg) scale(1.1); }
+        }
+        @keyframes move-aurora-2 {
+            from { transform: translateX(0) translateY(0) rotate(0deg) scale(1); }
+            to { transform: translateX(-100px) translateY(-50px) rotate(-180deg) scale(1.2); }
+        }
+        .hero-content {
+            position: relative;
+            z-index: 1; /* Ensure content is on top of the aurora */
+        }
+
 
         /* --- Card Styling for Light Theme --- */
         .light-card {
@@ -67,24 +110,35 @@
             -webkit-text-fill-color: transparent;
         }
 
-        /* --- Timeline --- */
+        /* --- Single-sided Timeline --- */
         .timeline::before {
             content: '';
             position: absolute;
-            left: 50%;
+            left: 0.5rem; /* Position line on the left */
             transform: translateX(-50%);
             top: 0;
             bottom: 0;
             width: 2px;
             background-color: #dee2e6; /* Light gray line */
         }
-        .timeline-item-dot {
+        .timeline-item {
+            position: relative;
+            padding-left: 2.5rem; /* Space for line and dot */
+            padding-bottom: 2.5rem;
+        }
+        .timeline-item:last-child {
+            padding-bottom: 0;
+        }
+        .timeline-dot {
             position: absolute;
-            left: 50%;
+            left: 0.5rem; /* Align with the line */
+            top: 0.25rem;
             transform: translateX(-50%);
             width: 1rem;
             height: 1rem;
             border-radius: 9999px;
+            background-color: white;
+            border: 3px solid; /* Border color will be set by Tailwind class */
         }
     </style>
 </head>
@@ -92,7 +146,8 @@
 
     <!-- Header & Hero Section -->
     <header id="home" class="hero-bg min-h-screen flex items-center justify-center p-6 lg:p-12">
-        <div class="container mx-auto flex flex-col md:flex-row items-center gap-12">
+        <div class="aurora-bg"></div>
+        <div class="hero-content container mx-auto flex flex-col md:flex-row items-center gap-12">
             
             <!-- Left Column: Intro Text -->
             <div class="md:w-3/5 text-center md:text-left">
@@ -100,7 +155,7 @@
                     蒋昌盛
                 </h1>
                 <p class="text-xl md:text-2xl font-medium text-gray-700 mb-8">
-                    市场研究员・用户洞察专家・数据决策驱动者
+                    市场研究员・用户洞察专家・AI数据科学家
                 </p>
                 <p class="max-w-xl mx-auto md:mx-0 text-gray-600 mb-10">
                     拥有超过3年市场研究与咨询经验，擅长融合定性与定量研究方法，将复杂数据转化为富有洞察力的商业故事，驱动产品创新与业务增长。
@@ -290,51 +345,58 @@
         </section>
 
         <!-- Experience Section -->
-        <section id="experience" class="max-w-3xl mx-auto">
+        <section id="experience" class="max-w-4xl mx-auto">
             <h2 class="text-4xl font-bold text-center mb-4 section-title">工作经历</h2>
             <p class="text-lg text-center text-gray-600 mb-16">我的职业成长足迹</p>
-            <div class="relative pt-4">
-                <div class="timeline"></div>
+            <div class="relative timeline">
                 <!-- Timeline Item 1 -->
-                <div class="relative mb-12 md:flex items-center w-full">
-                    <div class="timeline-item-dot bg-indigo-600 -top-1"></div>
-                    <div class="md:w-1/2 md:pr-8">
-                        <div class="light-card p-6">
-                            <p class="text-indigo-600 font-semibold text-sm">2024.05 - 至今</p>
-                            <h3 class="text-xl font-bold text-gray-800 mt-1 flex items-center gap-2">
-                                <i data-lucide="building-2" class="w-5 h-5 text-gray-500"></i>
-                                德施曼智能锁
-                            </h3>
-                            <p class="text-gray-700 font-medium mt-2">高级用户研究员 (战略方向)</p>
-                        </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot border-indigo-600"></div>
+                    <div class="light-card p-6 text-left">
+                        <p class="text-indigo-600 font-semibold text-sm">2024.05 - 至今</p>
+                        <h3 class="text-xl font-bold text-gray-800 mt-1 flex items-center gap-2">
+                            <i data-lucide="building-2" class="w-5 h-5 text-gray-500"></i>
+                            德施曼智能锁
+                        </h3>
+                        <p class="text-gray-700 font-medium mt-2">高级用户研究员 (战略方向)</p>
+                        <ul class="mt-4 space-y-2 text-gray-600 text-sm list-disc list-inside">
+                            <li>主导全国智能门锁渗透率、竞品购买渠道等战略研究，为高层决策提供核心依据。</li>
+                            <li>研究成果直接驱动两款核心产品销量增长15-20%，并支持了关键的区域扩张策略。</li>
+                            <li>与产品、营销团队紧密协作，将研究洞察落地，使产品开发周期缩短15%。</li>
+                        </ul>
                     </div>
                 </div>
                 <!-- Timeline Item 2 -->
-                <div class="relative mb-12 md:flex flex-row-reverse items-center w-full">
-                    <div class="timeline-item-dot bg-pink-600 -top-1"></div>
-                    <div class="md:w-1/2 md:pl-8">
-                        <div class="light-card p-6">
-                            <p class="text-pink-600 font-semibold text-sm">2022.09 - 2024.05</p>
-                            <h3 class="text-xl font-bold text-gray-800 mt-1 flex items-center gap-2">
-                                <i data-lucide="building-2" class="w-5 h-5 text-gray-500"></i>
-                                巧思市场调研
-                            </h3>
-                            <p class="text-gray-700 font-medium mt-2">高级研究员</p>
-                        </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot border-pink-600"></div>
+                    <div class="light-card p-6 text-left">
+                        <p class="text-pink-600 font-semibold text-sm">2022.09 - 2024.05</p>
+                        <h3 class="text-xl font-bold text-gray-800 mt-1 flex items-center gap-2">
+                            <i data-lucide="building-2" class="w-5 h-5 text-gray-500"></i>
+                            巧思市场调研
+                        </h3>
+                        <p class="text-gray-700 font-medium mt-2">高级研究员</p>
+                        <ul class="mt-4 space-y-2 text-gray-600 text-sm list-disc list-inside">
+                            <li>服务保时捷、上汽通用、可口可乐、花西子等头部客户，提供专业的市场研究服务。</li>
+                            <li>独立负责定量研究全流程，包括问卷设计、数据分析(NPS, PSM, KANO, MaxDiff)与报告撰写。</li>
+                            <li>熟练运用多种统计技术（因子分析、聚类分析等）进行深度数据解读与洞察挖掘。</li>
+                        </ul>
                     </div>
                 </div>
                 <!-- Timeline Item 3 -->
-                <div class="relative mb-12 md:flex items-center w-full">
-                    <div class="timeline-item-dot bg-teal-600 -top-1"></div>
-                    <div class="md:w-1/2 md:pr-8">
-                        <div class="light-card p-6">
-                            <p class="text-teal-600 font-semibold text-sm">2021.12 - 2022.09</p>
-                            <h3 class="text-xl font-bold text-gray-800 mt-1 flex items-center gap-2">
-                                <i data-lucide="building-2" class="w-5 h-5 text-gray-500"></i>
-                                快决测市场调研
-                            </h3>
-                            <p class="text-gray-700 font-medium mt-2">研究员</p>
-                        </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot border-teal-600"></div>
+                    <div class="light-card p-6 text-left">
+                        <p class="text-teal-600 font-semibold text-sm">2021.12 - 2022.09</p>
+                        <h3 class="text-xl font-bold text-gray-800 mt-1 flex items-center gap-2">
+                            <i data-lucide="building-2" class="w-5 h-5 text-gray-500"></i>
+                            快决测市场调研
+                        </h3>
+                        <p class="text-gray-700 font-medium mt-2">研究员</p>
+                        <ul class="mt-4 space-y-2 text-gray-600 text-sm list-disc list-inside">
+                            <li>积累了扎实的研究基本功，服务复星集团旗下多个子公司及其他知名企业。</li>
+                            <li>参与执行多个行业的市场调研项目，为后续独立负责项目打下坚实基础。</li>
+                        </ul>
                     </div>
                 </div>
             </div>
