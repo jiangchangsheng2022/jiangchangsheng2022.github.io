@@ -89,7 +89,7 @@
                 </div>
                 <div id="progress-step-4" class="text-center text-gray-400">
                     <div class="w-8 h-8 mx-auto rounded-full bg-gray-200 flex items-center justify-center mb-1">4</div>
-                    <p class="text-xs md:text-sm">模拟填充</p>
+                    <p class="text-xs md:text-sm">数据处理</p>
                 </div>
                 <div id="progress-step-5" class="text-center text-gray-400">
                     <div class="w-8 h-8 mx-auto rounded-full bg-gray-200 flex items-center justify-center mb-1">5</div>
@@ -133,18 +133,18 @@
                     <!-- 用户卡片将动态插入此处 -->
                 </div>
                 <button id="proceed-to-simulation-btn" class="mt-6 w-full bg-green-600 text-white font-bold py-3 px-4 rounded-md hover:bg-green-700 transition-colors flex items-center justify-center disabled:bg-gray-400 hidden">
-                    <span id="proceed-btn-text">开始模拟填充</span>
+                    <span id="proceed-btn-text">开始数据处理</span>
                     <div id="proceed-btn-loader" class="loader ai-loader w-6 h-6 border-t-white ml-3 hidden"></div>
                 </button>
                 <div id="error-step-3" class="text-red-500 mt-4 text-sm hidden"></div>
             </section>
 
-            <!-- 第四步: 问卷预览与模拟填充 -->
+            <!-- 第四步: 数据处理 -->
              <section id="step-4" class="step-section hidden-step bg-white p-6 rounded-lg shadow-md">
-                <h2 class="text-2xl font-bold mb-4">第四步：模拟填充</h2>
-                <p class="mb-4 text-gray-600">AI 正在模拟已招募的用户填写问卷，请稍候...</p>
+                <h2 class="text-2xl font-bold mb-4">第四步：数据处理</h2>
+                <p class="mb-4 text-gray-600">AI 正在模拟已招募的用户填写问卷并处理数据，请稍候...</p>
                 <div id="simulation-progress" class="mt-4 text-center text-gray-600">
-                    <p id="progress-text">正在准备模拟...</p>
+                    <p id="progress-text">正在处理数据...</p>
                     <div class="w-full bg-gray-200 rounded-full h-4 mt-2">
                         <div id="progress-bar" class="bg-green-600 h-4 rounded-full text-xs font-medium text-blue-100 text-center p-0.5 leading-none" style="width: 0%">0%</div>
                     </div>
@@ -201,7 +201,6 @@
         };
 
         const config = {
-            // [FIX] Switched back to SiliconFlow API configuration
             siliconflow: {
                 apiKey: 'sk-xifmrwnarxegowpdpwjmbpiodhjawjtacbkgtkoygpgszhec',
                 apiUrl: 'https://api.siliconflow.cn/v1/chat/completions',
@@ -252,7 +251,7 @@
             const payload = {
                 model: model,
                 messages: [{ role: 'user', content: prompt }],
-                max_tokens: 4096, // Adjusted to the API's limit
+                max_tokens: 4096,
             };
 
             for (let i = 0; i < retries; i++) {
@@ -425,17 +424,22 @@
             recruitedUsersContainer.innerHTML = '';
             state.recruitedUsers.forEach(user => {
                 const card = document.createElement('div');
-                card.className = 'user-card bg-white p-4 rounded-lg border border-gray-200';
+                card.className = 'user-card bg-white p-4 rounded-lg border border-gray-200 flex items-center space-x-4';
+                // [新增] 动态生成头像
+                const avatarUrl = `https://api.multiavatar.com/${encodeURIComponent(user.name)}.svg`;
                 card.innerHTML = `
-                    <h4 class="font-bold text-lg text-blue-700">${user.name}</h4>
-                    <p class="text-sm text-gray-600 mb-2">${user.gender}, ${user.age}岁</p>
-                    <p class="text-sm text-gray-800">${user.bio}</p>
+                    <img src="${avatarUrl}" alt="用户头像" class="w-16 h-16 rounded-full bg-gray-200 border-2 border-white shadow">
+                    <div>
+                        <h4 class="font-bold text-lg text-blue-700">${user.name}</h4>
+                        <p class="text-sm text-gray-600 mb-2">${user.gender}, ${user.age}岁</p>
+                        <p class="text-sm text-gray-800">${user.bio}</p>
+                    </div>
                 `;
                 recruitedUsersContainer.appendChild(card);
             });
         }
         
-        // Step 4: 模拟填充
+        // Step 4: 数据处理
         async function handleStartSimulation() {
             switchStep(4);
             state.simulationResults = [];
@@ -443,7 +447,7 @@
             
             for (let i = 0; i < state.recruitedUsers.length; i++) {
                 const user = state.recruitedUsers[i];
-                progressText.textContent = `正在模拟用户 ${i + 1}/${state.recruitedUsers.length}: ${user.name}...`;
+                progressText.textContent = `正在处理用户数据 ${i + 1}/${state.recruitedUsers.length}: ${user.name}...`;
                 
                 const prompt = `你是一个高级数据模拟器。现在，请为以下这位已被招募的用户，填写这份问卷。 \n\n你的任务是生成一个JSON对象，代表这位用户的完整问卷回答。回答必须严格符合用户的个人简介(bio)和画像特征。\n\n[重要规则]：在生成JSON时，如果任何字符串值（特别是 "bio" 或 "answers"）内部包含双引号(")，你必须用反斜杠进行转义，例如 "他说: \\"你好\\""。这是一个强制性要求，以确保JSON的有效性。\n\n这是当前用户的信息：\n${JSON.stringify(user, null, 2)}\n\n这是需要填写的问卷：\n${JSON.stringify(state.questionnaire, null, 2)}\n\n你的输出必须是一个严格的、格式完全正确的JSON对象。不要包含任何额外的解释或Markdown标记，必须以 \`\`\`json 开始和结束：\n\`\`\`json\n{\n    "respondentId": "user-${i + 1}",\n    "persona": ${JSON.stringify(user)},\n    "answers": [\n      { "questionId": "s1", "answer": "是" },\n      { "questionId": "m1", "answer": "品牌A" },\n      { "questionId": "m2", "answer": ["性能强大"] },\n      { "questionId": "m3", "answer": "满意" },\n      { "questionId": "d1", "answer": "男" },\n      { "questionId": "d2", "answer": "26-35岁" },\n      { "questionId": "d3", "answer": "技术/IT" }\n    ]\n}\n\`\`\`\n请确保回答与用户的个人信息和简介高度一致。`;
 
@@ -458,13 +462,13 @@
 
                 } catch (error) {
                     console.error(`模拟用户 ${user.name} 失败:`, error);
-                    errorStep4.textContent = `模拟用户 ${user.name} 时发生错误，已跳过。错误: ${error.message}`;
+                    errorStep4.textContent = `处理用户 ${user.name} 数据时发生错误，已跳过。错误: ${error.message}`;
                     errorStep4.classList.remove('hidden');
                     continue; // Skip to the next user if one fails
                 }
             }
             
-            progressText.textContent = `模拟完成！共获得 ${state.simulationResults.length} 份有效数据。`;
+            progressText.textContent = `数据处理完成！共获得 ${state.simulationResults.length} 份有效数据。`;
             setTimeout(() => {
                 switchStep(5);
                 handleGenerateReport();
@@ -551,27 +555,74 @@
                     reportCharts.appendChild(chartContainer);
 
                     const counts = {};
+                    let totalRespondentsForQuestion = 0;
                     state.simulationResults.forEach(res => {
                         const answerObj = res.answers.find(a => a.questionId === q.questionId);
-                        if (!answerObj || !answerObj.answer) return;
-                        if (Array.isArray(answerObj.answer)) {
-                            answerObj.answer.forEach(opt => { counts[opt] = (counts[opt] || 0) + 1; });
-                        } else {
-                            counts[answerObj.answer] = (counts[answerObj.answer] || 0) + 1;
+                        if (answerObj && answerObj.answer) {
+                            totalRespondentsForQuestion++;
+                            if (Array.isArray(answerObj.answer)) {
+                                answerObj.answer.forEach(opt => { counts[opt] = (counts[opt] || 0) + 1; });
+                            } else {
+                                counts[answerObj.answer] = (counts[answerObj.answer] || 0) + 1;
+                            }
                         }
                     });
 
+                    const totalBase = q.questionType === 'multiple-choice' ? state.simulationResults.length : totalRespondentsForQuestion;
+                    if (totalBase === 0) return; // Skip chart if no data
+
                     const labels = Object.keys(counts);
-                    const data = Object.values(counts);
+                    const percentageData = labels.map(label => {
+                        return ((counts[label] / totalBase) * 100).toFixed(1);
+                    });
+                    
                     const backgroundColors = labels.map((_, i) => `hsl(${(i * 200 / labels.length + 200)}, 70%, 60%)`);
                     
                     new Chart(canvas, {
-                        type: q.questionType === 'multiple-choice' ? 'bar' : 'pie',
+                        type: 'bar',
                         data: {
                             labels: labels,
-                            datasets: [{ label: '选择人数', data: data, backgroundColor: backgroundColors, borderColor: '#fff', borderWidth: 1 }]
+                            datasets: [{ 
+                                label: '选择百分比 (%)', 
+                                data: percentageData, 
+                                backgroundColor: backgroundColors, 
+                            }]
                         },
-                        options: { responsive: true, plugins: { legend: { position: 'top' } } }
+                        options: { 
+                            indexAxis: 'y',
+                            responsive: true, 
+                            scales: {
+                                x: {
+                                    beginAtZero: true,
+                                    max: 100,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return value + "%"
+                                        }
+                                    }
+                                }
+                            },
+                            plugins: { 
+                                legend: { 
+                                    display: false
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            let label = context.dataset.label || '';
+                                            if (label) {
+                                                label += ': ';
+                                            }
+                                            if (context.parsed.x !== null) {
+                                                const originalCount = counts[context.label];
+                                                label += `${context.parsed.x}% (${originalCount}人)`;
+                                            }
+                                            return label;
+                                        }
+                                    }
+                                }
+                            } 
+                        }
                     });
                 }
             });
